@@ -7,7 +7,7 @@ This project is not affiliated with, endorsed by, or sponsored by Stimulsoft or 
 ## Installation
 
 ```bash
-go get github.com/theerudito/stimulsoft_golang@v0.1.2
+go get github.com/theerudito/stimulsoft_golang@v0.1.3
 ```
 
 ## Usage
