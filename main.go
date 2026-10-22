@@ -1,5 +1,5 @@
-package main
+package stimulsoftgo
 
-func main() {
-	println("HOLA")
+func Hello() string {
+	return "HOLA"
 }
