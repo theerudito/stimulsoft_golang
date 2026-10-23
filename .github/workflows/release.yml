@@ -1,0 +1,43 @@
+name: release-runner
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  publish:
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            asset: stimulsoft-runner-win-x64.exe
+          - rid: linux-x64
+            asset: stimulsoft-runner-linux-x64
+          - rid: osx-arm64
+            asset: stimulsoft-runner-osx-arm64
+          - rid: osx-x64
+            asset: stimulsoft-runner-osx-x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      - run: dotnet publish runner/Stimulsoft.Runner.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
+      - run: mv publish/Stimulsoft.Runner${{ startsWith(matrix.rid, 'win') && '.exe' || '' }} publish/${{ matrix.asset }}
+      - run: sha256sum publish/${{ matrix.asset }} >> checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runner-${{ matrix.rid }}
+          path: |
+            publish/${{ matrix.asset }}
+            checksums.txt
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: assets }
+      - run: find assets -type f -name checksums.txt -exec cat {} + | sort -k2 -u > checksums.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            assets/**/stimulsoft-runner-*
+            checksums.txt

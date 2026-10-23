@@ -1,0 +1,32 @@
+# Editors and local tooling
+.idea/
+.vscode/
+.atl/
+.codegraph/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Go build/test output
+bin/
+obj/
+dist/
+build/
+coverage.out
+*.test
+
+# .NET build and publish output
+runner/bin/
+runner/obj/
+runner/publish/
+*.dll
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+
+# Native binaries must never be committed
+*.exe
+*.so
+*.dylib

@@ -1,0 +1,90 @@
+{
+  "empresa": {
+    "razon_social": "",
+    "nombre_comercial": "MULTICOMERCIO ESPINOZA",
+    "identificacion": "1711207454001",
+    "telefono": "",
+    "informacion_completa": "ESPINOZA LOOR FRANKLIN ARGEMIRO\nDirección Matriz: SAN MATEO S/N\nTelefonos: --\nEmail: franklinesp1970@gmail.com\r\nfranklinesp1970@hotmail.com\nObligado a Llevar Contabilidad: SI\nAgente de Retención No.Resolución: 1",
+    "ambiente": "PRUEBAS",
+    "informacion_adicional": "PASADO LOS 8 DIAS NO SE ACEPTAN DEBOLUCIONES",
+    "desarrollador": "SERVICIO GENERADO POR "
+  },
+  "informacion_adicional": {
+    "forma_pago": "Forma Pago\nSin Utilización Del Sistema Financiero 2,00\nOtros Con UtilizaciónDel Sistema Financiero 1,20",
+    "adicional": "INFORMACION ADICIONAL\nvendedor : ADMINISTRADOR\ncorreo : erudito.tv@gmail.com\nciudad : SANTO DOMINGO\n",
+    "texto_medida": "unidad"
+  },
+  "encabezado": {
+    "secuencial": "001-901-000338249",
+    "numero_autorizacion": "1003202601171120745400110019010003382491234567816",
+    "clave_de_acceso": "1003202601171120745400110019010003382491234567816",
+    "autorizacion_fecha": "10/03/2026 14:18:00",
+    "fecha_emision": "10/03/2026",
+    "fecha_vence": "10/03/2026",
+    "fecha_creacion": "10/03/2026"
+  },
+  "cliente": {
+    "razon_social": "LOOR MANTUANO EDWIN JORGE",
+    "identificacion": "1721457420",
+    "direccion": "Libertad del Toachi",
+    "telefono": "--",
+    "email": "erudito.tv@gmail.com"
+  },
+  "detalles": [
+    {
+      "codigo": "P000000028",
+      "codigo_auxiliar": "",
+      "descripcion": "PRODUCTO IVA 0",
+      "medida": "Unidad",
+      "iva": "",
+      "cantidad": "1,00",
+      "precio": "1,00",
+      "descuento": "0.00 %",
+      "total": "1,00",
+      "lleva_iva": ""
+    },
+    {
+      "codigo": "P000000027",
+      "codigo_auxiliar": "",
+      "descripcion": "PRODUCTO IVA 5",
+      "medida": "Unidad",
+      "iva": "",
+      "cantidad": "1,00",
+      "precio": "1,00",
+      "descuento": "0.00 %",
+      "total": "1,00",
+      "lleva_iva": "*"
+    },
+    {
+      "codigo": "P000000026",
+      "codigo_auxiliar": "",
+      "descripcion": "PRODUCTO IVA 15",
+      "medida": "Unidad",
+      "iva": "",
+      "cantidad": "1,00",
+      "precio": "1,00",
+      "descuento": "0.00 %",
+      "total": "1,00",
+      "lleva_iva": "*"
+    }
+  ],
+  "totales": {
+    "subtotal": 3.0,
+    "descuento": 0.0,
+    "subtotal_neto": 3.0,
+    "subtotal_iva_1": 1.0,
+    "subtotal_iva_2": 1.0,
+    "subtotal_sin_iva": 1.0,
+    "subtotal_no_objeto": 0.0,
+    "subtotal_exento": 0.0,
+    "ice": 0.0,
+    "iva_1": 0.15,
+    "iva_2": 0.05,
+    "propina": 0.0,
+    "texto_subtotal": "SubTotal 15%",
+    "texto_iva": "IVA 15%",
+    "total": 3.2,
+    "total_sin_subsidio": 0.0,
+    "ahorro_subsidio": 0.0
+  }
+}

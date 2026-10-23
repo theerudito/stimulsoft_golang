@@ -1,0 +1,90 @@
+{
+  "proforma": {
+    "fecha_emision": "08/03/2023",
+    "proforma_codigo": "P000000002",
+    "observacion": "Observacion: \r\n"
+  },
+  "empresa": {
+    "razon_social": "ESPINOZA LOOR FRANKLIN ARGEMIRO",
+    "nombre_comercial": "MULTICOMERCIO ESPINOZA",
+    "identificacion": "1711207454001",
+    "telefono": "--",
+    "informacion_completa": "Direción Matriz: SAN MATEO S/N\nCorreo: franklinesp1970@gmail.com\r\nfranklinesp1970@hotmail.com"
+  },
+  "cliente": {
+    "razon_social": "CONSUMIDOR FINAL",
+    "identificacion": "9999999999999",
+    "direccion": "CONSUMIDOR FINAL",
+    "telefono": "  ",
+    "email": ""
+  },
+  "detalles": [
+    {
+      "codigo": "P000000002",
+      "descripcion": "LC WHISKY JOHN MORRIS RED 1LT",
+      "iva": "12,00 %",
+      "cantidad": "9",
+      "precio": "10,07",
+      "descuento": "0.00 %",
+      "total": "90,60",
+      "lleva_iva": ""
+    },
+    {
+      "codigo": "P000000002",
+      "descripcion": "PILSENER BOTELLA",
+      "iva": "12,00 %",
+      "cantidad": "360",
+      "precio": "1,13",
+      "descuento": "0.00 %",
+      "total": "407,41",
+      "lleva_iva": "*"
+    },
+    {
+      "codigo": "P000000002",
+      "descripcion": "PILSENER LITRO X12",
+      "iva": "12,00 %",
+      "cantidad": "120",
+      "precio": "1,64",
+      "descuento": "0.00 %",
+      "total": "196,79",
+      "lleva_iva": "*"
+    },
+    {
+      "codigo": "P000000002",
+      "descripcion": "WHISKY SOMETHING SPECIAL 750ML",
+      "iva": "12,00 %",
+      "cantidad": "12",
+      "precio": "17,04",
+      "descuento": "0.00 %",
+      "total": "204,48",
+      "lleva_iva": ""
+    },
+    {
+      "codigo": "P000000002",
+      "descripcion": "GUITIG 1.5 C/6",
+      "iva": "12,00 %",
+      "cantidad": "18",
+      "precio": "0,76",
+      "descuento": "0.00 %",
+      "total": "13,74",
+      "lleva_iva": "*"
+    }
+  ],
+  "totales": {
+    "subtotal": 913.0314,
+    "descuento": 0.0,
+    "subtotal_neto": 913.0314,
+    "subtotal_iva_1": 913.0314,
+    "subtotal_iva_2": 0.0,
+    "subtotal_sin_iva": 0.0,
+    "subtotal_no_objeto": 0.0,
+    "subtotal_exento": 0.0,
+    "ice": 0.0,
+    "iva_1": 109.563768,
+    "iva_2": 0.0,
+    "propina": 0.0,
+    "texto_subtotal": "SubTotal 15%",
+    "texto_iva": "IVA 15%",
+    "total": 1022.6
+  }
+}

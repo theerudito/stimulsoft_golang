@@ -1,0 +1,25 @@
+{
+  "cabecera": {
+    "orden": "106985",
+    "cliente": "JORGE LOOR",
+    "piso": "1",
+    "mesa": "Mesa 2",
+    "mesero": "MESERO",
+    "fecha": "27/03/2026",
+    "total": "20.5"
+  },
+  "detalles": [
+    {
+      "cantidad": 10,
+      "descripcion": "CONTAFACIL PLAN 10 EMPRESAS"
+    },
+    {
+      "cantidad": 20,
+      "descripcion": "CONTAFACIL PLAN 20 EMPRESAS"
+    },
+    {
+      "cantidad": 30,
+      "descripcion": "CONTAFACIL PLAN 30 EMPRESAS"
+    }
+  ]
+}

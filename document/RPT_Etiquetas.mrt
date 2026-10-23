@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <CalculationMode>Interpretation</CalculationMode>
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="0" />
+    <Databases isList="true" count="1">
+      <informe Ref="2" type="Stimulsoft.Report.Dictionary.StiJsonDatabase" isKey="true">
+        <Alias>informe</Alias>
+        <HeadersString />
+        <Key />
+        <Name>informe</Name>
+        <PathData>C:\Users\Usuario\Desktop\Jorge\.NET\Impresion\PerseoImpresion\PerseoImpresion\temporales\RPT_Etiquetas.json</PathData>
+      </informe>
+    </Databases>
+    <DataSources isList="true" count="2">
+      <root Ref="3" type="DataTableSource" isKey="true">
+        <Alias>root</Alias>
+        <Columns isList="true" count="3">
+          <value>logo,System.String</value>
+          <value>nombre_comercial,System.String</value>
+          <value>detalles,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Key>3afb8e472f3b4f1e859eac651c2ca21c</Key>
+        <Name>root</Name>
+        <NameInSource>informe.root</NameInSource>
+      </root>
+      <root_detalles Ref="4" type="DataTableSource" isKey="true">
+        <Alias>root_detalles</Alias>
+        <Columns isList="true" count="39">
+          <value>productosid,System.Decimal</value>
+          <value>productocodigo,System.String</value>
+          <value>barras,System.String</value>
+          <value>descripcion,System.String</value>
+          <value>descripcion_corta,System.String</value>
+          <value>unidad_iterna_nombre,System.String</value>
+          <value>unidad_iterna_precio_1,System.String</value>
+          <value>unidad_iterna_precio_2,System.String</value>
+          <value>unidad_iterna_precio_3,System.String</value>
+          <value>unidad_iterna_precio_4,System.String</value>
+          <value>unidad_iterna_precio_5,System.String</value>
+          <value>unidad_iterna_precio_6,System.String</value>
+          <value>unidad_iterna_precio_7,System.String</value>
+          <value>unidad_iterna_precio_8,System.String</value>
+          <value>unidad_iterna_precio_9,System.String</value>
+          <value>unidad_iterna_precio_10,System.String</value>
+          <value>unidad_superior_nombre,System.String</value>
+          <value>unidad_superior_precio_1,System.String</value>
+          <value>unidad_superior_precio_2,System.String</value>
+          <value>unidad_superior_precio_3,System.String</value>
+          <value>unidad_superior_precio_4,System.String</value>
+          <value>unidad_superior_precio_5,System.String</value>
+          <value>unidad_superior_precio_6,System.String</value>
+          <value>unidad_superior_precio_7,System.String</value>
+          <value>unidad_superior_precio_8,System.String</value>
+          <value>unidad_superior_precio_9,System.String</value>
+          <value>unidad_superior_precio_10,System.String</value>
+          <value>unidad_inferior_nombre,System.String</value>
+          <value>unidad_inferior_precio_1,System.String</value>
+          <value>unidad_inferior_precio_2,System.String</value>
+          <value>unidad_inferior_precio_3,System.String</value>
+          <value>unidad_inferior_precio_4,System.String</value>
+          <value>unidad_inferior_precio_5,System.String</value>
+          <value>unidad_inferior_precio_6,System.String</value>
+          <value>unidad_inferior_precio_7,System.String</value>
+          <value>unidad_inferior_precio_8,System.String</value>
+          <value>unidad_inferior_precio_9,System.String</value>
+          <value>unidad_inferior_precio_10,System.String</value>
+          <value>relationId,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Key>d0b531462ff84cca9666abd627b21e62</Key>
+        <Name>root_detalles</Name>
+        <NameInSource>informe.root_detalles</NameInSource>
+      </root_detalles>
+    </DataSources>
+    <Relations isList="true" count="1">
+      <root Ref="5" type="DataRelation" isKey="true">
+        <Alias>root</Alias>
+        <ChildColumns isList="true" count="1">
+          <value>relationId</value>
+        </ChildColumns>
+        <ChildSource isRef="4" />
+        <Dictionary isRef="1" />
+        <Name>root</Name>
+        <NameInSource>root_detalles</NameInSource>
+        <ParentColumns isList="true" count="1">
+          <value>detalles</value>
+        </ParentColumns>
+        <ParentSource isRef="3" />
+      </root>
+    </Relations>
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <UserFunctions isList="true" count="0" />
+    <Variables isList="true" count="0" />
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>6e0a616ccb814258bb72be2e94f5ad37</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="6" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <ColumnGaps>0.3</ColumnGaps>
+      <Columns>2</Columns>
+      <Components isList="true" count="1">
+        <Detalle Ref="7" type="DataBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <BusinessObjectGuid isNull="true" />
+          <ClientRectangle>0,0.4,4.85,2.2</ClientRectangle>
+          <Components isList="true" count="3">
+            <BarCode2 Ref="8" type="Stimulsoft.Report.BarCodes.StiBarCode" isKey="true">
+              <BackColor>Transparent</BackColor>
+              <BarCodeType Ref="9" type="Stimulsoft.Report.BarCodes.StiEAN128bBarCodeType" isKey="true" />
+              <ClientRectangle>0.2,0.22,4.51,1</ClientRectangle>
+              <Code>{root_detalles.barras}</Code>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8,Bold,Pixel</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Name>BarCode2</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <VertAlignment>Center</VertAlignment>
+            </BarCode2>
+            <Text1 Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.24,4.71,0.27</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Name>Text1</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{root_detalles.productocodigo}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+            </Text1>
+            <Text2 Ref="11" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,1.53,4.71,0.27</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Expressions isList="true" count="0" />
+              <Font>Arial,8</Font>
+              <HorAlignment>Center</HorAlignment>
+              <Name>Text2</Name>
+              <Page isRef="6" />
+              <Parent isRef="7" />
+              <Text>{root_detalles.descripcion}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>DataColumn</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text2>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <DataRelationName isNull="true" />
+          <DataSourceName>root_detalles</DataSourceName>
+          <Expressions isList="true" count="0" />
+          <Filters isList="true" count="0" />
+          <Name>Detalle</Name>
+          <Page isRef="6" />
+          <Parent isRef="6" />
+          <Sort isList="true" count="0" />
+        </Detalle>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Expressions isList="true" count="1">
+        <value>Brush,</value>
+      </Expressions>
+      <GapAfterLastColumn>False</GapAfterLastColumn>
+      <Guid>1f06a00119624b5a95a3f845c88f10f3</Guid>
+      <Interaction Ref="12" type="Stimulsoft.Report.Components.StiInteraction" isKey="true">
+        <DrillDownPageGuid>e8ffeb9d547248c8a36ae0921b2e64e5</DrillDownPageGuid>
+      </Interaction>
+      <Margins>0,0,0,0</Margins>
+      <Name>Page1</Name>
+      <PageHeight>2.25</PageHeight>
+      <PageWidth>10</PageWidth>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportAuthor>Boss</ReportAuthor>
+  <ReportChanged>4/14/2026 8:29:17 AM</ReportChanged>
+  <ReportCreated>1/20/2026 4:10:26 PM</ReportCreated>
+  <ReportFile>C:\Users\Usuario\Desktop\Jorge\.NET\Impresion\PerseoImpresion\PerseoImpresion\reportes\originales\RPT_Etiquetas.mrt</ReportFile>
+  <ReportGuid>3b168887d932460fb61c691dac8fd31f</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2026.1.7.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+  <UsePlatformDependentScript>False</UsePlatformDependentScript>
+</StiSerializer>
