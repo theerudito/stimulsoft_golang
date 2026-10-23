@@ -53,11 +53,10 @@ internal static class Program
                 using var report = new StiReport();
                 report.Load(templatePath);
                 report.Dictionary.Databases.Clear();
-                report.Dictionary.DataSources.Clear();
                 report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, jsonPath));
                 report.Dictionary.Synchronize();
                 InjectVariables(report, request.Variables);
-                report.Render();
+                report.Render(false);
                 using var output = new MemoryStream();
                 Export(report, output, (request.Format ?? "pdf").ToLowerInvariant(), request.Options);
                 Console.OpenStandardOutput().Write(output.GetBuffer(), 0, checked((int)output.Length));
@@ -123,8 +122,8 @@ internal static class Program
     {
         switch (format)
         {
-            case "pdf": new StiPdfExportService().ExportPdf(report, stream); break;
-            case "excel": new StiExcelExportService().ExportExcel(report, stream); break;
+            case "pdf": report.ExportDocument(StiExportFormat.Pdf, stream); break;
+            case "excel": report.ExportDocument(StiExportFormat.Excel, stream); break;
             case "csv": new StiCsvExportService().ExportCsv(report, stream); break;
             case "html": new StiHtmlExportService().ExportHtml(report, stream); break;
             default: throw new ArgumentException($"unsupported format '{format}' (expected pdf, excel, csv, or html)");
