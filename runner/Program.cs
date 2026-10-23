@@ -51,10 +51,9 @@ internal static class Program
                 File.WriteAllText(jsonPath, request.Data, new UTF8Encoding(false));
 
                 using var report = new StiReport();
+                report.Load(templatePath);
                 report.Dictionary.Databases.Clear();
                 report.Dictionary.DataSources.Clear();
-                report.DataStore.Clear();
-                report.Load(templatePath);
                 report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, jsonPath));
                 report.Dictionary.Synchronize();
                 InjectVariables(report, request.Variables);
