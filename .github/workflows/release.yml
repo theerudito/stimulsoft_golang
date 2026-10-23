@@ -13,20 +13,18 @@ jobs:
         include:
           - rid: win-x64
             asset: stimulsoft-runner-win-x64.exe
-          - rid: linux-x64
-            asset: stimulsoft-runner-linux-x64
-          - rid: osx-arm64
-            asset: stimulsoft-runner-osx-arm64
-          - rid: osx-x64
-            asset: stimulsoft-runner-osx-x64
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: 8.0.x }
       - run: dotnet publish runner/Stimulsoft.Runner.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
-      - run: mv publish/Stimulsoft.Runner${{ startsWith(matrix.rid, 'win') && '.exe' || '' }} publish/${{ matrix.asset }}
-      - run: sha256sum publish/${{ matrix.asset }} >> checksums.txt
+      - shell: pwsh
+        run: Move-Item publish\Stimulsoft.Runner.exe publish\${{ matrix.asset }}
+      - shell: pwsh
+        run: |
+          $hash = (Get-FileHash publish\${{ matrix.asset }} -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  ${{ matrix.asset }}" | Out-File checksums.txt -Encoding ascii
       - uses: actions/upload-artifact@v4
         with:
           name: runner-${{ matrix.rid }}

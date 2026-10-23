@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultVersion    = "v0.1.12"
+	DefaultVersion    = "v0.1.13"
 	DefaultOwner      = "example"
 	DefaultRepo       = "stimulsoft-golang"
 	DefaultReleaseURL = "https://github.com/theerudito/stimulsoft_golang/releases/download"
