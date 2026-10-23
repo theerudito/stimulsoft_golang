@@ -2,6 +2,10 @@ name: release-runner
 on:
   push:
     tags: ["v*"]
+
+permissions:
+  contents: write
+
 jobs:
   publish:
     strategy:
