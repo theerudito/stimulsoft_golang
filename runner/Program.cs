@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Linq;
 using Stimulsoft.Base;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Dictionary;
@@ -39,8 +40,7 @@ internal static class Program
             var template = request.MRT.TrimStart('\uFEFF', '\u200B', '\u0000', '\r', '\n', ' ', '\t');
             if (template.StartsWith("ï»¿", StringComparison.Ordinal)) template = template[3..];
             report.LoadFromString(template);
-            report.Dictionary.Databases.Clear();
-            report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, request.Data));
+            ConfigureJsonDatabase(report, dataSourceName, request.Data);
             report.Dictionary.Synchronize();
             InjectVariables(report, request.Variables);
             report.Render(false);
@@ -54,6 +54,24 @@ internal static class Program
             Console.Error.WriteLine(ex.ToString());
             return 1;
         }
+    }
+
+    private static void ConfigureJsonDatabase(StiReport report, string dataSourceName, string data)
+    {
+        var database = report.Dictionary.Databases
+            .Cast<StiDatabase>()
+            .FirstOrDefault(item => string.Equals(item.Name, dataSourceName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(item.Alias, dataSourceName, StringComparison.OrdinalIgnoreCase));
+
+        if (database is StiJsonDatabase jsonDatabase)
+        {
+            // Keep the MRT dictionary, relations, aliases, and datasource definitions intact.
+            // Only replace the JSON payload supplied by the caller.
+            jsonDatabase.PathData = data;
+            return;
+        }
+
+        report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, data));
     }
 
     private static void InjectVariables(StiReport report, Dictionary<string, JsonElement>? values)
