@@ -12,18 +12,34 @@ jobs:
       matrix:
         include:
           - rid: win-x64
+            tfm: net8.0
             asset: stimulsoft-runner-win-x64.exe
-    runs-on: windows-latest
+            runner: windows-latest
+          - rid: linux-x64
+            tfm: net8.0
+            asset: stimulsoft-runner-linux-x64
+            runner: ubuntu-latest
+          - rid: osx-arm64
+            tfm: net8.0
+            asset: stimulsoft-runner-osx-arm64
+            runner: macos-latest
+          - rid: osx-x64
+            tfm: net8.0
+            asset: stimulsoft-runner-osx-x64
+            runner: macos-13
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: 8.0.x }
-      - run: dotnet publish runner/Stimulsoft.Runner.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
-      - shell: pwsh
-        run: Move-Item publish\Stimulsoft.Runner.exe publish\${{ matrix.asset }}
+      - run: dotnet publish runner/Stimulsoft.Runner.csproj -c Release -f ${{ matrix.tfm }} -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=false -o publish
       - shell: pwsh
         run: |
-          $hash = (Get-FileHash publish\${{ matrix.asset }} -Algorithm SHA256).Hash.ToLowerInvariant()
+          $suffix = if ("${{ matrix.rid }}" -eq "win-x64") { ".exe" } else { "" }
+          Move-Item "publish/Stimulsoft.Runner$suffix" "publish/${{ matrix.asset }}"
+      - shell: pwsh
+        run: |
+          $hash = (Get-FileHash "publish/${{ matrix.asset }}" -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  ${{ matrix.asset }}" | Out-File checksums.txt -Encoding ascii
       - uses: actions/upload-artifact@v4
         with:

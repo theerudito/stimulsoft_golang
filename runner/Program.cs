@@ -34,7 +34,9 @@ internal static class Program
             var request = JsonSerializer.Deserialize<Request>(Console.In.ReadToEnd(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new InvalidDataException("request is empty");
             if (!string.IsNullOrWhiteSpace(request.LicenseKey)) StiLicense.Key = request.LicenseKey;
-            Stimulsoft.Drawing.Graphics.GraphicsEngine = Stimulsoft.Drawing.GraphicsEngine.Gdi;
+            Stimulsoft.Drawing.Graphics.GraphicsEngine = OperatingSystem.IsWindows()
+                ? Stimulsoft.Drawing.GraphicsEngine.Gdi
+                : Stimulsoft.Drawing.GraphicsEngine.ImageSharp;
             if (string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt is required");
             var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
