@@ -1,7 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Linq;
+using System.Text;
 using Stimulsoft.Base;
+using Stimulsoft.Drawing;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report.Export;
@@ -33,21 +35,37 @@ internal static class Program
             var request = JsonSerializer.Deserialize<Request>(Console.In.ReadToEnd(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new InvalidDataException("request is empty");
             if (!string.IsNullOrWhiteSpace(request.LicenseKey)) StiLicense.Key = request.LicenseKey;
+            Graphics.GraphicsEngine = GraphicsEngine.Gdi;
             if (string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt is required");
             var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
-            using var report = new StiReport();
             var template = request.MRT.TrimStart('\uFEFF', '\u200B', '\u0000', '\r', '\n', ' ', '\t');
             if (template.StartsWith("ï»¿", StringComparison.Ordinal)) template = template[3..];
-            report.LoadFromString(template);
-            ConfigureJsonDatabase(report, dataSourceName, request.Data);
-            report.Dictionary.Synchronize();
-            InjectVariables(report, request.Variables);
-            report.Render(false);
-            using var output = new MemoryStream();
-            Export(report, output, (request.Format ?? "pdf").ToLowerInvariant(), request.Options);
-            Console.OpenStandardOutput().Write(output.GetBuffer(), 0, checked((int)output.Length));
-            return 0;
+            var workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(workDirectory);
+            try
+            {
+                var templatePath = Path.Combine(workDirectory, "report.mrt");
+                var jsonPath = Path.Combine(workDirectory, "data.json");
+                File.WriteAllText(templatePath, template, new UTF8Encoding(false));
+                File.WriteAllText(jsonPath, request.Data, new UTF8Encoding(false));
+
+                using var report = new StiReport();
+                report.Load(templatePath);
+                report.Dictionary.Databases.Clear();
+                report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, jsonPath));
+                report.Dictionary.Synchronize();
+                InjectVariables(report, request.Variables);
+                report.Render(false);
+                using var output = new MemoryStream();
+                Export(report, output, (request.Format ?? "pdf").ToLowerInvariant(), request.Options);
+                Console.OpenStandardOutput().Write(output.GetBuffer(), 0, checked((int)output.Length));
+                return 0;
+            }
+            finally
+            {
+                try { Directory.Delete(workDirectory, true); } catch { }
+            }
         }
         catch (Exception ex)
         {
