@@ -4,30 +4,29 @@ Source-only Go client for a self-contained .NET 8 Stimulsoft runner. The Go modu
 
 ## Export API
 
-For local files, the primary API sends the original MRT and JSON paths directly to the runner. Go does not read or copy either file. The data source name defaults to `Data`; use another name when the MRT expects it. Pass an empty license key to run without a license.
+The preferred API uses a local MRT path and in-memory JSON bytes. The MRT is passed directly to the runner; JSON bytes use the runner's temporary-file fallback. The data source name defaults to `Data`; use another name when the MRT expects it. Pass an empty license key to run without a license.
 
 Pass an empty source name to select the default explicitly:
 
-```go
 licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
-pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey)
-```
-
-```go
-licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
-pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey)
-excel, err := stimulsoft.ExportExcel(ctx, mrtPath, jsonPath, "Data", licenseKey)
+jsonData := []byte(`{"items":[{"name":"From SQL","quantity":2}]}`)
+pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonData, "Data", licenseKey)
+excel, err := stimulsoft.ExportExcel(ctx, mrtPath, jsonData, "Data", licenseKey)
 ```
 
 Variables are optional:
 
 ```go
-pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey, variables)
+pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonData, "Data", licenseKey, variables)
 ```
 
-### In-memory API
+### Three input modes
 
-For in-memory or remote content, use the explicit byte helpers. They use temporary files only inside the runner:
+* **Mixed mode:** `ExportPDF` and `ExportExcel` take a local MRT path and JSON `[]byte`.
+* **Path mode:** `ExportPDFPaths` and `ExportExcelPaths` take local MRT and JSON paths without copying them in Go.
+* **Byte mode:** `ExportPDFBytes` and `ExportExcelBytes` take both MRT and JSON as in-memory `[]byte` values.
+
+For fully in-memory or remote content, use the explicit byte helpers. They use temporary files only inside the runner:
 
 ```go
 jsonFromSQL := []byte(`{"items":[{"name":"From SQL","quantity":2}]}`)

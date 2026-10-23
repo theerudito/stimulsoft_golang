@@ -65,14 +65,14 @@ func ExportExcelPaths(ctx context.Context, mrtPath, dataPath, sourceName, licens
 	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "excel", optionalVariables(variables))
 }
 
-// ExportPDF renders local MRT and JSON files as PDF without reading or copying them in Go.
-func ExportPDF(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "pdf", optionalVariables(variables))
+// ExportPDF renders a local MRT path with in-memory JSON data as PDF.
+func ExportPDF(ctx context.Context, mrtPath string, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+	return exportMixedFormat(ctx, mrtPath, data, "pdf", sourceName, licenseKey, optionalVariables(variables))
 }
 
-// ExportExcel renders local MRT and JSON files as Excel without reading or copying them in Go.
-func ExportExcel(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "excel", optionalVariables(variables))
+// ExportExcel renders a local MRT path with in-memory JSON data as Excel.
+func ExportExcel(ctx context.Context, mrtPath string, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+	return exportMixedFormat(ctx, mrtPath, data, "excel", sourceName, licenseKey, optionalVariables(variables))
 }
 
 // ExportPDFBytes renders in-memory MRT and JSON content as PDF.
@@ -106,6 +106,25 @@ func exportFormat(ctx context.Context, mrt, data []byte, format, sourceName, lic
 		return nil, errors.New("data must be valid JSON")
 	}
 	return Export(ctx, ExportRequest{LicenseKey: licenseKey, MRT: string(mrt), Data: string(data), DataSourceName: sourceName, Format: format, Variables: variables})
+}
+
+func exportMixedFormat(ctx context.Context, mrtPath string, data []byte, format, sourceName, licenseKey string, variables map[string]any) ([]byte, error) {
+	if err := validateLocalFile(mrtPath, "mrt_path"); err != nil {
+		return nil, err
+	}
+	if sourceName == "" {
+		sourceName = "Data"
+	}
+	if len(data) == 0 {
+		data = []byte("null")
+	}
+	if !json.Valid(data) {
+		return nil, errors.New("data must be valid JSON")
+	}
+	return Export(ctx, ExportRequest{
+		LicenseKey: licenseKey, MRTPath: mrtPath, Data: string(data),
+		DataSourceName: sourceName, Format: format, Variables: variables,
+	})
 }
 
 func optionalVariables(values []map[string]any) map[string]any {

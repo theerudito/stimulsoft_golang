@@ -42,10 +42,12 @@ internal static class Program
             Stimulsoft.Drawing.Graphics.GraphicsEngine = OperatingSystem.IsWindows()
                 ? Stimulsoft.Drawing.GraphicsEngine.Gdi
                 : Stimulsoft.Drawing.GraphicsEngine.ImageSharp;
-			var hasMRTPath = !string.IsNullOrWhiteSpace(request.MRTPath);
-			var hasDataPath = !string.IsNullOrWhiteSpace(request.DataPath);
-			if (hasMRTPath != hasDataPath) throw new InvalidDataException("mrt_path and data_path must be provided together");
-			if (!hasMRTPath && string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt or mrt_path is required");
+				var hasMRTPath = !string.IsNullOrWhiteSpace(request.MRTPath);
+				var hasDataPath = !string.IsNullOrWhiteSpace(request.DataPath);
+				var hasInlineData = !string.IsNullOrWhiteSpace(request.Data);
+				if (hasDataPath && !hasMRTPath) throw new InvalidDataException("data_path requires mrt_path");
+				if (!hasMRTPath && string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt or mrt_path is required");
+				if (hasMRTPath && !hasDataPath && !hasInlineData) throw new InvalidDataException("data or data_path is required with mrt_path");
 			var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
 			string? workDirectory = null;
@@ -53,11 +55,21 @@ internal static class Program
 			{
 				string templatePath;
 				string jsonPath;
-				if (hasMRTPath)
-				{
-					templatePath = ValidateLocalFile(request.MRTPath!, "mrt_path");
-					jsonPath = ValidateLocalFile(request.DataPath!, "data_path");
-				}
+					if (hasMRTPath)
+					{
+						templatePath = ValidateLocalFile(request.MRTPath!, "mrt_path");
+						if (hasDataPath)
+						{
+							jsonPath = ValidateLocalFile(request.DataPath!, "data_path");
+						}
+						else
+						{
+							workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
+							Directory.CreateDirectory(workDirectory);
+							jsonPath = Path.Combine(workDirectory, "data.json");
+							File.WriteAllText(jsonPath, request.Data.TrimStart('\uFEFF'), new UTF8Encoding(true));
+						}
+					}
 				else
 				{
 					var template = request.MRT.TrimStart('\uFEFF');
@@ -130,8 +142,6 @@ internal static class Program
         if (values is null) return;
         foreach (var pair in values)
         {
-            // Variable definitions belong to the MRT dictionary. Reflection is isolated here because
-            // ValueObject differs between Stimulsoft package generations; unknown names are ignored.
             var variable = report.Dictionary.Variables[pair.Key];
             if (variable is null) continue;
             var value = PrimitiveValue(pair.Value);
