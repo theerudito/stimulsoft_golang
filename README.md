@@ -4,32 +4,34 @@ Source-only Go client for a self-contained .NET 8 Stimulsoft runner. The Go modu
 
 ## Export API
 
-The existing byte-based exports receive MRT text and raw JSON text. They remain useful for in-memory or remote content and use temporary files only inside the runner. The data source name defaults to `Data`; use another name when the MRT expects it. Pass an empty license key to run without a license.
+For local files, the primary API sends the original MRT and JSON paths directly to the runner. Go does not read or copy either file. The data source name defaults to `Data`; use another name when the MRT expects it. Pass an empty license key to run without a license.
 
 Pass an empty source name to select the default explicitly:
 
 ```go
 licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
-pdf, err := stimulsoft.ExportPDF(ctx, mrt, jsonData, "Data", licenseKey)
+pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey)
 ```
 
 ```go
 licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
-pdf, err := stimulsoft.ExportPDF(ctx, mrt, jsonData, "Data", licenseKey)
-excel, err := stimulsoft.ExportExcel(ctx, mrt, jsonData, "Data", licenseKey)
+pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey)
+excel, err := stimulsoft.ExportExcel(ctx, mrtPath, jsonPath, "Data", licenseKey)
 ```
 
 Variables are optional:
 
 ```go
-pdf, err := stimulsoft.ExportPDF(ctx, mrt, jsonData, "Data", licenseKey, variables)
+pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonPath, "Data", licenseKey, variables)
 ```
 
-If JSON comes from SQL, do not create a temporary file:
+### In-memory API
+
+For in-memory or remote content, use the explicit byte helpers. They use temporary files only inside the runner:
 
 ```go
 jsonFromSQL := []byte(`{"items":[{"name":"From SQL","quantity":2}]}`)
-pdf, err := stimulsoft.ExportPDF(ctx, mrt, jsonFromSQL, "Data", licenseKey)
+pdf, err := stimulsoft.ExportPDFBytes(ctx, mrt, jsonFromSQL, "Data", licenseKey)
 ```
 
 The compatibility method `ExportSimple` has the explicit source and format parameters:
@@ -38,12 +40,7 @@ The compatibility method `ExportSimple` has the explicit source and format param
 out, err := stimulsoft.ExportSimple(ctx, string(mrt), string(jsonData), "Data", licenseKey, "pdf", nil)
 ```
 
-For local files, use path mode to let the .NET runner load the original files directly without copying them:
-
-```go
-pdf, err := stimulsoft.ExportPDFPaths(ctx, mrtPath, jsonPath, "Data", licenseKey)
-excel, err := stimulsoft.ExportExcelPaths(ctx, mrtPath, jsonPath, "Data", licenseKey)
-```
+The corresponding byte helpers are `ExportPDFBytes` and `ExportExcelBytes`.
 
 ## Example
 
