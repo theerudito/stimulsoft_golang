@@ -51,12 +51,14 @@ internal static class Program
                 File.WriteAllText(jsonPath, request.Data, new UTF8Encoding(false));
 
                 using var report = new StiReport();
-                report.Load(templatePath);
                 report.Dictionary.Databases.Clear();
+                report.Dictionary.DataSources.Clear();
+                report.DataStore.Clear();
+                report.Load(templatePath);
                 report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, jsonPath));
                 report.Dictionary.Synchronize();
                 InjectVariables(report, request.Variables);
-                report.Render(false);
+                report.Render();
                 using var output = new MemoryStream();
                 Export(report, output, (request.Format ?? "pdf").ToLowerInvariant(), request.Options);
                 Console.OpenStandardOutput().Write(output.GetBuffer(), 0, checked((int)output.Length));
