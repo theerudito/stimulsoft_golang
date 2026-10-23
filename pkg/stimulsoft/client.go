@@ -65,23 +65,33 @@ func ExportExcelPaths(ctx context.Context, mrtPath, dataPath, sourceName, licens
 	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "excel", optionalVariables(variables))
 }
 
-// ExportPDF renders an MRT report as PDF. Variables are optional.
-func ExportPDF(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+// ExportPDF renders local MRT and JSON files as PDF without reading or copying them in Go.
+func ExportPDF(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "pdf", optionalVariables(variables))
+}
+
+// ExportExcel renders local MRT and JSON files as Excel without reading or copying them in Go.
+func ExportExcel(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "excel", optionalVariables(variables))
+}
+
+// ExportPDFBytes renders in-memory MRT and JSON content as PDF.
+func ExportPDFBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportFormat(ctx, mrt, data, "pdf", sourceName, licenseKey, optionalVariables(variables))
 }
 
-// ExportExcel renders an MRT report as Excel. Variables are optional.
-func ExportExcel(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+// ExportExcelBytes renders in-memory MRT and JSON content as Excel.
+func ExportExcelBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportFormat(ctx, mrt, data, "excel", sourceName, licenseKey, optionalVariables(variables))
 }
 
-// ExportCSV renders an MRT report as CSV. Variables are optional.
-func ExportCSV(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+// ExportCSVBytes renders in-memory MRT and JSON content as CSV.
+func ExportCSVBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportFormat(ctx, mrt, data, "csv", sourceName, licenseKey, optionalVariables(variables))
 }
 
-// ExportHTML renders an MRT report as HTML. Variables are optional.
-func ExportHTML(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
+// ExportHTMLBytes renders in-memory MRT and JSON content as HTML.
+func ExportHTMLBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportFormat(ctx, mrt, data, "html", sourceName, licenseKey, optionalVariables(variables))
 }
 
