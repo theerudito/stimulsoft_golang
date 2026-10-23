@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/theerudito/stimulsoft_golang/internal/config"
 	"github.com/theerudito/stimulsoft_golang/internal/downloader"
@@ -18,8 +17,6 @@ func Export(ctx context.Context, request ExportRequest) ([]byte, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	request.MRT = strings.TrimPrefix(request.MRT, "\uFEFF")
-	request.Data = strings.TrimPrefix(request.Data, "\uFEFF")
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, err

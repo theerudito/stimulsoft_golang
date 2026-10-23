@@ -31,6 +31,7 @@ internal static class Program
     {
         try
         {
+            Console.InputEncoding = new UTF8Encoding(false);
             var request = JsonSerializer.Deserialize<Request>(Console.In.ReadToEnd(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new InvalidDataException("request is empty");
             if (!string.IsNullOrWhiteSpace(request.LicenseKey)) StiLicense.Key = request.LicenseKey;
@@ -39,17 +40,17 @@ internal static class Program
                 : Stimulsoft.Drawing.GraphicsEngine.ImageSharp;
             if (string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt is required");
             var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
+            var template = request.MRT.TrimStart('\uFEFF');
+            var data = request.Data.TrimStart('\uFEFF');
 
-            var template = request.MRT.TrimStart('\uFEFF', '\u200B', '\u0000', '\r', '\n', ' ', '\t');
-            if (template.StartsWith("ï»¿", StringComparison.Ordinal)) template = template[3..];
             var workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(workDirectory);
             try
             {
                 var templatePath = Path.Combine(workDirectory, "report.mrt");
                 var jsonPath = Path.Combine(workDirectory, "data.json");
-                File.WriteAllText(templatePath, template, new UTF8Encoding(false));
-                File.WriteAllText(jsonPath, request.Data, new UTF8Encoding(false));
+                File.WriteAllText(templatePath, template, new UTF8Encoding(true));
+                File.WriteAllText(jsonPath, data, new UTF8Encoding(true));
 
                 using var report = new StiReport();
                 report.Load(templatePath);
