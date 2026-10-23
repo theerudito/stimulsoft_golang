@@ -30,3 +30,7 @@ runner/publish/
 *.exe
 *.so
 *.dylib
+
+# Local examples and report fixtures
+cmd/
+document/

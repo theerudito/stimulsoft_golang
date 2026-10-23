@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using System.Linq;
 using System.Text;
 using Stimulsoft.Base;
-using Stimulsoft.Drawing;
 using Stimulsoft.Report;
 using Stimulsoft.Report.Dictionary;
 using Stimulsoft.Report.Export;
@@ -35,7 +34,7 @@ internal static class Program
             var request = JsonSerializer.Deserialize<Request>(Console.In.ReadToEnd(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new InvalidDataException("request is empty");
             if (!string.IsNullOrWhiteSpace(request.LicenseKey)) StiLicense.Key = request.LicenseKey;
-            Graphics.GraphicsEngine = GraphicsEngine.Gdi;
+            Stimulsoft.Drawing.Graphics.GraphicsEngine = Stimulsoft.Drawing.GraphicsEngine.Gdi;
             if (string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt is required");
             var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
