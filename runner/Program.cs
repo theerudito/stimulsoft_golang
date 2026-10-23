@@ -123,7 +123,7 @@ internal static class Program
         switch (format)
         {
             case "pdf": report.ExportDocument(StiExportFormat.Pdf, stream); break;
-            case "excel": report.ExportDocument(StiExportFormat.Excel, stream); break;
+            case "excel": new StiExcel2007ExportService().ExportExcel(report, stream); break;
             case "csv": new StiCsvExportService().ExportCsv(report, stream); break;
             case "html": new StiHtmlExportService().ExportHtml(report, stream); break;
             default: throw new ArgumentException($"unsupported format '{format}' (expected pdf, excel, csv, or html)");
