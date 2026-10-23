@@ -11,10 +11,14 @@ internal sealed class Request
 {
     [JsonPropertyName("license_key")]
     public string? LicenseKey { get; set; }
-    [JsonPropertyName("mrt")]
-    public string MRT { get; set; } = "";
-    [JsonPropertyName("data")]
-    public string Data { get; set; } = "null";
+	[JsonPropertyName("mrt")]
+	public string MRT { get; set; } = "";
+	[JsonPropertyName("data")]
+	public string Data { get; set; } = "null";
+	[JsonPropertyName("mrt_path")]
+	public string? MRTPath { get; set; }
+	[JsonPropertyName("data_path")]
+	public string? DataPath { get; set; }
     [JsonPropertyName("data_source_name")]
     public string DataSourceName { get; set; } = "Data";
     [JsonPropertyName("format")]
@@ -38,19 +42,33 @@ internal static class Program
             Stimulsoft.Drawing.Graphics.GraphicsEngine = OperatingSystem.IsWindows()
                 ? Stimulsoft.Drawing.GraphicsEngine.Gdi
                 : Stimulsoft.Drawing.GraphicsEngine.ImageSharp;
-            if (string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt is required");
-            var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
-            var template = request.MRT.TrimStart('\uFEFF');
-            var data = request.Data.TrimStart('\uFEFF');
+			var hasMRTPath = !string.IsNullOrWhiteSpace(request.MRTPath);
+			var hasDataPath = !string.IsNullOrWhiteSpace(request.DataPath);
+			if (hasMRTPath != hasDataPath) throw new InvalidDataException("mrt_path and data_path must be provided together");
+			if (!hasMRTPath && string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt or mrt_path is required");
+			var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
-            var workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(workDirectory);
-            try
-            {
-                var templatePath = Path.Combine(workDirectory, "report.mrt");
-                var jsonPath = Path.Combine(workDirectory, "data.json");
-                File.WriteAllText(templatePath, template, new UTF8Encoding(true));
-                File.WriteAllText(jsonPath, data, new UTF8Encoding(true));
+			string? workDirectory = null;
+			try
+			{
+				string templatePath;
+				string jsonPath;
+				if (hasMRTPath)
+				{
+					templatePath = ValidateLocalFile(request.MRTPath!, "mrt_path");
+					jsonPath = ValidateLocalFile(request.DataPath!, "data_path");
+				}
+				else
+				{
+					var template = request.MRT.TrimStart('\uFEFF');
+					var data = request.Data.TrimStart('\uFEFF');
+					workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
+					Directory.CreateDirectory(workDirectory);
+					templatePath = Path.Combine(workDirectory, "report.mrt");
+					jsonPath = Path.Combine(workDirectory, "data.json");
+					File.WriteAllText(templatePath, template, new UTF8Encoding(true));
+					File.WriteAllText(jsonPath, data, new UTF8Encoding(true));
+				}
 
                 using var report = new StiReport();
                 report.Load(templatePath);
@@ -66,7 +84,10 @@ internal static class Program
             }
             finally
             {
-                try { Directory.Delete(workDirectory, true); } catch { }
+                if (workDirectory is not null)
+                {
+                    try { Directory.Delete(workDirectory, true); } catch { }
+                }
             }
         }
         catch (Exception ex)
@@ -74,6 +95,16 @@ internal static class Program
             Console.Error.WriteLine(ex.ToString());
             return 1;
         }
+    }
+
+    private static string ValidateLocalFile(string path, string field)
+    {
+        if (Uri.TryCreate(path, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Scheme) && uri.Scheme != Uri.UriSchemeFile)
+            throw new InvalidDataException($"{field} must be a local file path");
+        var fullPath = Path.GetFullPath(path);
+        if (!File.Exists(fullPath)) throw new FileNotFoundException($"{field} does not exist", fullPath);
+        if ((File.GetAttributes(fullPath) & FileAttributes.Directory) != 0) throw new InvalidDataException($"{field} must be a file");
+        return fullPath;
     }
 
     private static void ConfigureJsonDatabase(StiReport report, string dataSourceName, string data)
