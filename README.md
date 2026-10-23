@@ -1,60 +1,145 @@
- # Stimulsoft Go client
+# Stimulsoft Go Client
 
-Source-only Go client for a self-contained .NET 8 Stimulsoft runner. The Go module contains no binaries or embedded assets. The runner is downloaded lazily or selected with `STIMULSOFT_RUNNER_PATH`.
+Render Stimulsoft `.mrt` reports from Go through a self-contained .NET 8 runner.
+The MRT stays on disk, while report data can come directly from a query, struct,
+or pointer as JSON bytes.
 
-## Export API
+## Quick start
 
-The preferred API uses a local MRT path and in-memory JSON bytes. The MRT is passed directly to the runner; JSON bytes use the runner's temporary-file fallback. The data source name defaults to `Data`; use another name when the MRT expects it. Pass an empty license key to run without a license.
+### 1. Add the module
 
-Pass an empty source name to select the default explicitly:
-
-licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
-jsonData := []byte(`{"items":[{"name":"From SQL","quantity":2}]}`)
-pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonData, "Data", licenseKey)
-excel, err := stimulsoft.ExportExcel(ctx, mrtPath, jsonData, "Data", licenseKey)
+```bash
+go get github.com/theerudito/stimulsoft_golang
 ```
 
-Variables are optional:
+### 2. Render PDF or Excel
 
 ```go
-pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonData, "Data", licenseKey, variables)
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"os"
+	"time"
+
+	"github.com/theerudito/stimulsoft_golang/pkg/stimulsoft"
+)
+
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// The MRT can be relative or absolute.
+	mrtPath := "./document/RPT_Factura_Electronica_Rollo.mrt"
+	licenseKey := os.Getenv("STIMULSOFT_LICENSE_KEY")
+
+	// pedido may come from SQL, an API, a struct, or a pointer.
+	pedido := map[string]any{"items": []any{map[string]any{"name": "Example", "quantity": 2}}}
+	jsonBytes, err := json.MarshalIndent(pedido, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	pdf, err := stimulsoft.ExportPDF(ctx, mrtPath, jsonBytes, "informe", licenseKey)
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile("report.pdf", pdf, 0644); err != nil {
+		panic(err)
+	}
+
+	excel, err := stimulsoft.ExportExcel(ctx, mrtPath, jsonBytes, "informe", licenseKey)
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile("report.xlsx", excel, 0644); err != nil {
+		panic(err)
+	}
+}
 ```
 
-### Three input modes
+The `informe` value must match the JSON datasource expected by the MRT. If the
+report uses another datasource name, pass that name instead.
 
-* **Mixed mode:** `ExportPDF` and `ExportExcel` take a local MRT path and JSON `[]byte`.
-* **Path mode:** `ExportPDFPaths` and `ExportExcelPaths` take local MRT and JSON paths without copying them in Go.
-* **Byte mode:** `ExportPDFBytes` and `ExportExcelBytes` take both MRT and JSON as in-memory `[]byte` values.
+## API
 
-For fully in-memory or remote content, use the explicit byte helpers. They use temporary files only inside the runner:
+The client intentionally exposes only two export helpers:
+
+| Function | Input | Output |
+|---|---|---|
+| `ExportPDF` | MRT path + JSON `[]byte` | PDF bytes |
+| `ExportExcel` | MRT path + JSON `[]byte` | XLSX bytes |
+
+Both functions:
+
+- Accept relative or absolute MRT paths.
+- Validate the MRT before starting the runner.
+- Accept JSON generated with `json.Marshal` or `json.MarshalIndent`.
+- Leave the original MRT unchanged.
+- Accept optional report variables as the final argument.
 
 ```go
-jsonFromSQL := []byte(`{"items":[{"name":"From SQL","quantity":2}]}`)
-pdf, err := stimulsoft.ExportPDFBytes(ctx, mrt, jsonFromSQL, "Data", licenseKey)
+variables := map[string]any{
+	"CompanyName": "Example Company",
+}
+
+pdf, err := stimulsoft.ExportPDF(
+	ctx,
+	"./document/report.mrt",
+	jsonBytes,
+	"informe",
+	licenseKey,
+	variables,
+)
 ```
 
-The compatibility method `ExportSimple` has the explicit source and format parameters:
+## Runner
 
-```go
-out, err := stimulsoft.ExportSimple(ctx, string(mrt), string(jsonData), "Data", licenseKey, "pdf", nil)
-```
-
-The corresponding byte helpers are `ExportPDFBytes` and `ExportExcelBytes`.
-
-## Example
-
-From `cmd/` (the example uses path mode):
+The runner is downloaded automatically for the current platform and cached
+locally. To use a locally published runner instead:
 
 ```powershell
-go run . ..\document\RPT_Comanda.mrt ..\document\RPT_Comanda.json
+dotnet publish runner\Stimulsoft.Runner.csproj `
+  -c Release `
+  -r win-x64 `
+  --self-contained true `
+  -o "$env:TEMP\stimulsoft-runner\win-x64"
+
+$env:STIMULSOFT_RUNNER_PATH = `
+  "$env:TEMP\stimulsoft-runner\win-x64\Stimulsoft.Runner.exe"
 ```
 
-## Local runner
+The runner targets .NET 8 and uses Stimulsoft Reports Engine NetCore `2026.1.7`.
+Windows uses GDI; Linux and macOS use ImageSharp.
 
-```powershell
-dotnet publish runner\Stimulsoft.Runner.csproj -c Release -r win-x64 --self-contained true -o "$env:TEMP\stimulsoft-runner\win-x64"
-$env:STIMULSOFT_RUNNER_PATH="$env:TEMP\stimulsoft-runner\win-x64\Stimulsoft.Runner.exe"
-go run .
+## Configuration
+
+| Environment variable | Purpose |
+|---|---|
+| `STIMULSOFT_LICENSE_KEY` | Stimulsoft license key |
+| `STIMULSOFT_RUNNER_PATH` | Use a local runner instead of downloading one |
+| `STIMULSOFT_RUNNER_VERSION` | Select a released runner version |
+| `STIMULSOFT_RUNNER_OWNER` | Override the GitHub owner |
+| `STIMULSOFT_RUNNER_REPO` | Override the GitHub repository |
+| `STIMULSOFT_RUNNER_BASE_URL` | Override the runner download base URL |
+
+An empty license key is allowed for evaluation or environments where the
+Stimulsoft license is configured elsewhere.
+
+## Development
+
+```bash
+go test ./...
+go vet ./...
+dotnet build runner/Stimulsoft.Runner.csproj
 ```
 
-The runner supports PDF, Excel, CSV, and HTML through stdin/stdout. Path mode validates local files and never modifies or deletes them; byte mode uses temporary fallback files. The official Stimulsoft package and license terms apply. Trimming is disabled by default because Stimulsoft uses reflection; test an aggressive trimming profile before enabling it.
+## Scope
+
+Currently supported:
+
+- PDF
+- Excel (`.xlsx`)
+
+CSV, HTML, and other formats are intentionally outside the current public API.

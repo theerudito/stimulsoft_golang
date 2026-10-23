@@ -33,38 +33,6 @@ func Export(ctx context.Context, request ExportRequest) ([]byte, error) {
 	return runner.Execute(ctx, path, bytes.NewReader(payload))
 }
 
-func ExportSimple(ctx context.Context, mrt, data, sourceName, licenseKey, format string, variables map[string]any) ([]byte, error) {
-	return exportFormat(ctx, []byte(mrt), []byte(data), format, sourceName, licenseKey, variables)
-}
-
-// ExportPaths renders a report using the original local MRT and JSON files.
-// Unlike the byte-based helpers, it does not read or copy either file in Go.
-func ExportPaths(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey, format string, variables map[string]any) ([]byte, error) {
-	if err := validateLocalFile(mrtPath, "mrt_path"); err != nil {
-		return nil, err
-	}
-	if err := validateLocalFile(dataPath, "data_path"); err != nil {
-		return nil, err
-	}
-	if sourceName == "" {
-		sourceName = "Data"
-	}
-	return Export(ctx, ExportRequest{
-		LicenseKey: licenseKey, MRTPath: mrtPath, DataPath: dataPath,
-		DataSourceName: sourceName, Format: format, Variables: variables,
-	})
-}
-
-// ExportPDFPaths renders a local MRT and JSON file as PDF without copying them.
-func ExportPDFPaths(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "pdf", optionalVariables(variables))
-}
-
-// ExportExcelPaths renders a local MRT and JSON file as Excel without copying them.
-func ExportExcelPaths(ctx context.Context, mrtPath, dataPath, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return ExportPaths(ctx, mrtPath, dataPath, sourceName, licenseKey, "excel", optionalVariables(variables))
-}
-
 // ExportPDF renders a local MRT path with in-memory JSON data as PDF.
 func ExportPDF(ctx context.Context, mrtPath string, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportMixedFormat(ctx, mrtPath, data, "pdf", sourceName, licenseKey, optionalVariables(variables))
@@ -73,39 +41,6 @@ func ExportPDF(ctx context.Context, mrtPath string, data []byte, sourceName, lic
 // ExportExcel renders a local MRT path with in-memory JSON data as Excel.
 func ExportExcel(ctx context.Context, mrtPath string, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
 	return exportMixedFormat(ctx, mrtPath, data, "excel", sourceName, licenseKey, optionalVariables(variables))
-}
-
-// ExportPDFBytes renders in-memory MRT and JSON content as PDF.
-func ExportPDFBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return exportFormat(ctx, mrt, data, "pdf", sourceName, licenseKey, optionalVariables(variables))
-}
-
-// ExportExcelBytes renders in-memory MRT and JSON content as Excel.
-func ExportExcelBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return exportFormat(ctx, mrt, data, "excel", sourceName, licenseKey, optionalVariables(variables))
-}
-
-// ExportCSVBytes renders in-memory MRT and JSON content as CSV.
-func ExportCSVBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return exportFormat(ctx, mrt, data, "csv", sourceName, licenseKey, optionalVariables(variables))
-}
-
-// ExportHTMLBytes renders in-memory MRT and JSON content as HTML.
-func ExportHTMLBytes(ctx context.Context, mrt, data []byte, sourceName, licenseKey string, variables ...map[string]any) ([]byte, error) {
-	return exportFormat(ctx, mrt, data, "html", sourceName, licenseKey, optionalVariables(variables))
-}
-
-func exportFormat(ctx context.Context, mrt, data []byte, format, sourceName, licenseKey string, variables map[string]any) ([]byte, error) {
-	if sourceName == "" {
-		sourceName = "Data"
-	}
-	if len(data) == 0 {
-		data = []byte("null")
-	}
-	if !json.Valid(data) {
-		return nil, errors.New("data must be valid JSON")
-	}
-	return Export(ctx, ExportRequest{LicenseKey: licenseKey, MRT: string(mrt), Data: string(data), DataSourceName: sourceName, Format: format, Variables: variables})
 }
 
 func exportMixedFormat(ctx context.Context, mrtPath string, data []byte, format, sourceName, licenseKey string, variables map[string]any) ([]byte, error) {

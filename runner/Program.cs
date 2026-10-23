@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Linq;
 using System.Text;
 using Stimulsoft.Base;
 using Stimulsoft.Report;
@@ -11,22 +10,16 @@ internal sealed class Request
 {
     [JsonPropertyName("license_key")]
     public string? LicenseKey { get; set; }
-	[JsonPropertyName("mrt")]
-	public string MRT { get; set; } = "";
-	[JsonPropertyName("data")]
-	public string Data { get; set; } = "null";
-	[JsonPropertyName("mrt_path")]
-	public string? MRTPath { get; set; }
-	[JsonPropertyName("data_path")]
-	public string? DataPath { get; set; }
+    [JsonPropertyName("mrt_path")]
+    public string? MRTPath { get; set; }
+    [JsonPropertyName("data")]
+    public string Data { get; set; } = "null";
     [JsonPropertyName("data_source_name")]
     public string DataSourceName { get; set; } = "Data";
     [JsonPropertyName("format")]
     public string? Format { get; set; }
     [JsonPropertyName("variables")]
     public Dictionary<string, JsonElement>? Variables { get; set; }
-    [JsonPropertyName("options")]
-    public Dictionary<string, JsonElement>? Options { get; set; }
 }
 
 internal static class Program
@@ -38,49 +31,24 @@ internal static class Program
             Console.InputEncoding = new UTF8Encoding(false);
             var request = JsonSerializer.Deserialize<Request>(Console.In.ReadToEnd(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new InvalidDataException("request is empty");
+            // Report exporters may write trial notices to Console.Out. The process stdout is
+            // the binary export channel, so text output must never share it.
+            Console.SetOut(TextWriter.Null);
             if (!string.IsNullOrWhiteSpace(request.LicenseKey)) StiLicense.Key = request.LicenseKey;
             Stimulsoft.Drawing.Graphics.GraphicsEngine = OperatingSystem.IsWindows()
                 ? Stimulsoft.Drawing.GraphicsEngine.Gdi
                 : Stimulsoft.Drawing.GraphicsEngine.ImageSharp;
-				var hasMRTPath = !string.IsNullOrWhiteSpace(request.MRTPath);
-				var hasDataPath = !string.IsNullOrWhiteSpace(request.DataPath);
-				var hasInlineData = !string.IsNullOrWhiteSpace(request.Data);
-				if (hasDataPath && !hasMRTPath) throw new InvalidDataException("data_path requires mrt_path");
-				if (!hasMRTPath && string.IsNullOrWhiteSpace(request.MRT)) throw new InvalidDataException("mrt or mrt_path is required");
-				if (hasMRTPath && !hasDataPath && !hasInlineData) throw new InvalidDataException("data or data_path is required with mrt_path");
-			var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
+            if (string.IsNullOrWhiteSpace(request.MRTPath)) throw new InvalidDataException("mrt_path is required");
+            var dataSourceName = string.IsNullOrWhiteSpace(request.DataSourceName) ? "Data" : request.DataSourceName;
 
-			string? workDirectory = null;
-			try
-			{
-				string templatePath;
-				string jsonPath;
-					if (hasMRTPath)
-					{
-						templatePath = ValidateLocalFile(request.MRTPath!, "mrt_path");
-						if (hasDataPath)
-						{
-							jsonPath = ValidateLocalFile(request.DataPath!, "data_path");
-						}
-						else
-						{
-							workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
-							Directory.CreateDirectory(workDirectory);
-							jsonPath = Path.Combine(workDirectory, "data.json");
-							File.WriteAllText(jsonPath, request.Data.TrimStart('\uFEFF'), new UTF8Encoding(true));
-						}
-					}
-				else
-				{
-					var template = request.MRT.TrimStart('\uFEFF');
-					var data = request.Data.TrimStart('\uFEFF');
-					workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
-					Directory.CreateDirectory(workDirectory);
-					templatePath = Path.Combine(workDirectory, "report.mrt");
-					jsonPath = Path.Combine(workDirectory, "data.json");
-					File.WriteAllText(templatePath, template, new UTF8Encoding(true));
-					File.WriteAllText(jsonPath, data, new UTF8Encoding(true));
-				}
+            string? workDirectory = null;
+            try
+            {
+                var templatePath = ValidateLocalFile(request.MRTPath!, "mrt_path");
+                workDirectory = Path.Combine(Path.GetTempPath(), "stimulsoft-runner", Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(workDirectory);
+                var jsonPath = Path.Combine(workDirectory, "data.json");
+                File.WriteAllText(jsonPath, request.Data.TrimStart('\uFEFF'), new UTF8Encoding(true));
 
                 using var report = new StiReport();
                 report.Load(templatePath);
@@ -90,8 +58,9 @@ internal static class Program
                 InjectVariables(report, request.Variables);
                 report.Render(false);
                 using var output = new MemoryStream();
-                Export(report, output, (request.Format ?? "pdf").ToLowerInvariant(), request.Options);
-                Console.OpenStandardOutput().Write(output.GetBuffer(), 0, checked((int)output.Length));
+                var format = (request.Format ?? "pdf").ToLowerInvariant();
+                Export(report, output, format);
+                WriteOutput(output, format);
                 return 0;
             }
             finally
@@ -119,24 +88,6 @@ internal static class Program
         return fullPath;
     }
 
-    private static void ConfigureJsonDatabase(StiReport report, string dataSourceName, string data)
-    {
-        var database = report.Dictionary.Databases
-            .Cast<StiDatabase>()
-            .FirstOrDefault(item => string.Equals(item.Name, dataSourceName, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(item.Alias, dataSourceName, StringComparison.OrdinalIgnoreCase));
-
-        if (database is StiJsonDatabase jsonDatabase)
-        {
-            // Keep the MRT dictionary, relations, aliases, and datasource definitions intact.
-            // Only replace the JSON payload supplied by the caller.
-            jsonDatabase.PathData = data;
-            return;
-        }
-
-        report.Dictionary.Databases.Add(new StiJsonDatabase(dataSourceName, data));
-    }
-
     private static void InjectVariables(StiReport report, Dictionary<string, JsonElement>? values)
     {
         if (values is null) return;
@@ -161,15 +112,39 @@ internal static class Program
         _ => value.GetRawText()
     };
 
-    private static void Export(StiReport report, Stream stream, string format, Dictionary<string, JsonElement>? options)
+    private static void Export(StiReport report, Stream stream, string format)
     {
         switch (format)
         {
             case "pdf": report.ExportDocument(StiExportFormat.Pdf, stream); break;
             case "excel": new StiExcel2007ExportService().ExportExcel(report, stream); break;
-            case "csv": new StiCsvExportService().ExportCsv(report, stream); break;
-            case "html": new StiHtmlExportService().ExportHtml(report, stream); break;
-            default: throw new ArgumentException($"unsupported format '{format}' (expected pdf, excel, csv, or html)");
+            default: throw new ArgumentException($"unsupported format '{format}' (expected pdf or excel)");
         }
+    }
+
+    private static void WriteOutput(MemoryStream output, string format)
+    {
+        var bytes = output.ToArray();
+        if (format == "excel")
+        {
+            var zipStart = FindZipStart(bytes);
+            if (zipStart < 0)
+                throw new InvalidDataException("Excel export did not produce a ZIP archive");
+            Console.OpenStandardOutput().Write(bytes, zipStart, bytes.Length - zipStart);
+            return;
+        }
+
+        Console.OpenStandardOutput().Write(bytes);
+    }
+
+    private static int FindZipStart(byte[] bytes)
+    {
+        for (var i = 0; i <= bytes.Length - 4; i++)
+        {
+            if (bytes[i] == 0x50 && bytes[i + 1] == 0x4B && bytes[i + 2] == 0x03 && bytes[i + 3] == 0x04)
+                return i;
+        }
+
+        return -1;
     }
 }
