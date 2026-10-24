@@ -9,7 +9,7 @@ or pointer as JSON bytes.
 ### 1. Add the module
 
 ```bash
- go get github.com/theerudito/stimulsoft_golang@v0.1.25
+go get github.com/theerudito/stimulsoft_golang@v0.1.26
 ```
 
 ### 2. Render PDF or Excel
