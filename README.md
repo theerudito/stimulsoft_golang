@@ -9,7 +9,7 @@ or pointer as JSON bytes.
 ### 1. Add the module
 
 ```bash
-go get github.com/theerudito/stimulsoft_golang@v0.1.22
+ go get github.com/theerudito/stimulsoft_golang@v0.1.25
 ```
 
 ### 2. Render PDF or Excel
@@ -23,7 +23,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/theerudito/stimulsoft_golang/pkg/stimulsoft"
+	stimulsoft "github.com/theerudito/stimulsoft_golang"
 )
 
 func main() {
